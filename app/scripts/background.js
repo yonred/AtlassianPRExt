@@ -5,8 +5,6 @@ chrome.runtime.onInstalled.addListener(function (details) {
   	console.log('previousVersion', details.previousVersion);
 });
 
-//chrome.browserAction.setBadgeText({text: 'Buenas'});
-
 var stashObj = {
 	reviewItems: [],
 	authorItems: [],
@@ -21,7 +19,6 @@ var stashObj = {
 				stashObj.reviewItems = data.values;
         		stashObj.updateNotifications();
         		chrome.browserAction.setBadgeText({text: stashObj.reviewItems.length + ' PR'});
-        		console.log('reviews', stashObj.reviewItems);
 			}
 		});
 	},
@@ -32,7 +29,6 @@ var stashObj = {
 			dataType:"json",
 			success: function(data) {
 				stashObj.authorItems = data.values;
-        		console.log('auhtor', stashObj.authorItems);
 			}
 		});
 	},
@@ -46,7 +42,6 @@ var stashObj = {
 				data.values.forEach(function(item) {
 					stashObj.pullRequestItems.push(item.reviewers);
 				});
-        		console.log('pull request', stashObj.pullRequestItems);
 			}
 		});
 	},
@@ -79,15 +74,17 @@ var stashObj = {
 
 		if (stashObj.seenNotifications.indexOf(url) === -1) {
             stashObj.seenNotifications.push(url);
-            stashObj.reviewComments.push(comments);
+            stashObj.reviewComments.push({"url": url, "comments": comments});
 			chrome.notifications.create(url, notificationOptions);
-		} else if (stashObj.reviewComments[index][0] !== stashObj.reviewItems[index].attributes.commentCount[0]) {
-			stashObj.reviewComments[index][0] = stashObj.reviewItems[index].attributes.commentCount[0];
-			notificationOptions.title = 'NEW COMMENT FOR';
-			chrome.notifications.create(url, notificationOptions);
+		} else {
+			stashObj.reviewComments.forEach(function(itemObj) {
+				if (itemObj.url === url && itemObj.comments[0] !== comments[0]) {
+					itemObj.comments[0] = comments[0];
+					notificationOptions.title = 'NEW COMMENT FOR';
+					chrome.notifications.create(url, notificationOptions);
+				}
+			});
 		}
-		console.log('reviewComents: ', stashObj.reviewComments[index][0]);
-		console.log('reviewItems: ', stashObj.reviewItems[index].attributes.commentCount[0]);
 	}
 };
 stashObj.init();
