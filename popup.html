@@ -1,0 +1,162 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <!-- build:css styles/popup-vendor.css -->
+    <!-- bower:css -->
+    <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- endbower -->
+    <!-- endbuild -->
+    <!-- build:css styles/main.css -->
+    <link href="styles/main.css" rel="stylesheet">
+    <!-- endbuild -->
+  </head>
+  <body ng-app="stashApp">
+    <div class="stash-app-container" ng-controller="reviewListCtrl">
+        <div class="container">
+            <div ng-show="objBamboo.result[0].buildState == 'Failed'" class="alert alert-danger" role="alert">
+                <strong>BUILD #{{objBamboo.result[0].buildNumber}} FAILED!</strong> Check build status, before merge any ticket in this <a href="http://bamboo.lbi.co.uk/browse/HELIOS-AEMDEV" target="_blank" class="alert-link">Link</a>
+            </div>
+            <div ng-show="objBamboo.statusText == 'error'" class="alert alert-warning" role="alert">
+                <strong>BAMBOO CONNECTION!</strong> Connect to your VPN or check Bamboo status in this <a href="http://bamboo.lbi.co.uk/browse/HELIOS-AEMDEV" target="_blank" class="alert-link">Link</a>
+            </div>
+            <ul id="myTabs" class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active">
+                    <a href="#reviews" id="reviews-tab" role="tab" data-toggle="tab" aria-controls="reviews" aria-expanded="true">Reviews</a>
+                </li>
+                <li role="presentation" class="">
+                    <a href="#author" role="tab" id="author-tab" data-toggle="tab" aria-controls="author" aria-expanded="false">Author</a>
+                </li>
+                <li role="presentation" class="">
+                    <a href="#front-devs" role="tab" id="front-devs-tab" data-toggle="tab" aria-controls="front-devs" aria-expanded="false">Front Devs</a>
+                </li>
+                <li role="presentation" class="">
+                    <a href="#back-devs" role="tab" id="back-devs-tab" data-toggle="tab" aria-controls="back-devs" aria-expanded="false">Back Devs</a>
+                </li>
+                <li role="presentation" class="">
+                    <a href="#is-devs" role="tab" id="is-devs-tab" data-toggle="tab" aria-controls="is-devs" aria-expanded="false">IS Devs</a>
+                </li>
+            </ul>
+            <div id="myTabContent" class="tab-content extension">
+                <div role="tabpanel" class="tab-pane fade active in" id="reviews" aria-labelledby="reviews-tab">
+                    <div class="panel-group" id="accordionReview" role="tablist" aria-multiselectable="true">
+                      <div ng-repeat="item in listReviews" class="panel panel-default" ng-class="{'panel-warning': (item.reviewers | myFilter2:[true]).length == 2, 'panel-success': (item.reviewers | myFilter2:[true]).length > 2 }">
+                        <div class="panel-heading" role="tab" id="{{ item.id }}">
+                          <h4 class="panel-title">
+                            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordionReview" href="#item{{ item.id }}" aria-expanded="false" aria-controls="item{{ item.id }}">
+                              {{ item.title }}
+                            </a>
+                            <span class="caret"></span>
+                            <div class="pull-right">
+                                {{ (item.reviewers | myFilter2:[true]).length }} <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            </div>
+                          </h4>
+                        </div>
+                        <div id="item{{ item.id }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{ item.id }}">
+                          <div class="panel-body">
+                            <p>Created by {{ item.author.user.displayName }}</p>
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    <strong>Reviewers</strong>
+                                    <ul class="list-unstyled">
+                                      <li ng-repeat="review in item.reviewers">{{ review.user.displayName }} <span ng-show="review.approved" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span></li>
+                                    </ul>
+                                </div>
+                                <div class="col-xs-6">
+                                    <p>Comments <span class="badge">{{ item.attributes.commentCount[0] || 0 }}</span></p>
+                                    <p>Open tasks <span class="badge">{{ item.attributes.openTaskCount[0] || 0 }}</span></p>
+                                    <p>Resolved tasks <span class="badge">{{ item.attributes.resolvedTaskCount[0] || 0 }}</span></p>
+                                    <a class="btn btn-info" href="{{item.links.self[0].href}}" target="_blank">View Pull Request</a>
+                                </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <h4 class="text-center" ng-if="listReviews.length == 0">You don't have PR's to review</h4>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane fade" id="author" aria-labelledby="author-tab">
+                    <div class="panel-group" id="accordionAuthor" role="tablist" aria-multiselectable="true">
+                      <div ng-repeat="item in listAuthor" class="panel panel-default" ng-class="{'panel-warning': (item.reviewers | myFilter2:[true]).length == 2, 'panel-success': (item.reviewers | myFilter2:[true]).length > 2 }">
+                        <div class="panel-heading" role="tab" id="{{ item.id }}">
+                          <h4 class="panel-title">
+                            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordionAuthor" href="#item{{ item.id }}" aria-expanded="false" aria-controls="item{{ item.id }}">
+                              {{ item.title }}
+                            </a>
+                            <span class="caret"></span>
+                            <div class="pull-right">
+                                {{ (item.reviewers | myFilter2:[true]).length }} <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                            </div>
+                          </h4>
+                        </div>
+                        <div id="item{{ item.id }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{ item.id }}">
+                          <div class="panel-body">
+                            <p>Created by {{ item.author.user.displayName }}</p>
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    <strong>Reviewers</strong>
+                                    <ul class="list-unstyled">
+                                      <li ng-repeat="review in item.reviewers">{{ review.user.displayName }} <span ng-show="review.approved" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                                      </li>
+                                    </ul>
+                                </div>
+                                <div class="col-xs-6">
+                                    <p>Comments <span class="badge">{{ item.attributes.commentCount[0] || 0 }}</span></p>
+                                    <p>Open tasks <span class="badge">{{ item.attributes.openTaskCount[0] || 0 }}</span></p>
+                                    <p>Resolved tasks <span class="badge">{{ item.attributes.resolvedTaskCount[0] || 0 }}</span></p>
+                                    <a class="btn btn-info" href="{{item.links.self[0].href}}" target="_blank">View Pull Request</a>
+                                </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <h4 class="text-center" ng-if="listAuthor.length == 0">You don't have PR's open</h4>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane fade" id="front-devs" aria-labelledby="front-devs-tab">
+                    <h3 class="text-center">Front Reviewers</h3>
+                    <ul class="list-group reviewers-list clearfix">
+                      <li ng-repeat="item in listDevelopers.frontEnd" ng-class="{'active': (listPullRequest | myFilter:[item.email]).length >= 5 }" class="list-group-item col-xs-6">
+                        <span class="badge">{{ (listPullRequest | myFilter:[item.email]).length }}</span>
+                        {{ item.name }}
+                      </li>
+                    </ul>
+                    <h4 class="text-center" ng-if="listDevelopers.frontEnd.length == 0">Add name and email of your Front End group</h4>
+                </div>
+                <div role="tabpanel" class="tab-pane fade" id="back-devs" aria-labelledby="back-devs-tab">
+                    <h3 class="text-center">Back Reviewers</h3>
+                    <ul class="list-group reviewers-list clearfix">
+                      <li ng-repeat="item in listDevelopers.backEnd" ng-class="{'active': (listPullRequest | myFilter:[item.email]).length >= 5 }" class="list-group-item col-xs-6">
+                        <span class="badge">{{ (listPullRequest | myFilter:[item.email]).length }}</span>
+                        {{ item.name }}
+                      </li>
+                    </ul>
+                    <h4 class="text-center" ng-if="listDevelopers.devIS.length == 0">Add name and email of your Back End group</h4>
+                </div>
+                <div role="tabpanel" class="tab-pane fade" id="is-devs" aria-labelledby="is-devs-tab">
+                    <h3 class="text-center">IS Reviewers</h3>
+                    <ul class="list-group reviewers-list clearfix">
+                      <li ng-repeat="item in listDevelopers.devIS" ng-class="{'active': (listPullRequest | myFilter:[item.email]).length >= 5 }" class="list-group-item col-xs-6">
+                        <span class="badge">{{ (listPullRequest | myFilter:[item.email]).length }}</span>
+                        {{ item.name }}
+                      </li>
+                    </ul>
+                    <h4 class="text-center" ng-if="listDevelopers.devIS.length == 0">Add name and email of your IS group</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- build:js scripts/popup-vendor.js -->
+    <!-- bower:js -->
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/angular/angular.min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+
+    <!-- build:js scripts/popup.js -->
+    <script src="scripts/popup.js"></script>
+    <!-- endbuild -->
+  </body>
+</html>
