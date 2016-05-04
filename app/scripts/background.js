@@ -10,6 +10,8 @@ var stashObj = {
 	authorItems: [],
 	seenNotifications: [],
 	reviewComments: [],
+	buildStatus: {},
+	redBuild: false,
 	getReviewRequest: function() {
 		$.ajax({
 			method: "GET",
@@ -45,11 +47,33 @@ var stashObj = {
 			}
 		});
 	},
+	getBuildStatus: function() {
+		$.ajax({
+			method: "GET",
+			url: "http://bamboo.lbi.co.uk/rest/api/latest/result/HELIOS-AEMDEV",
+			dataType:"json",
+			success: function(data) {
+				stashObj.buildStatus = data.results;
+
+				if (stashObj.buildStatus.result[0].buildState !== 'Failed') {
+					stashObj.redBuild === false;
+        			chrome.browserAction.setBadgeBackgroundColor({color: '#53B145'});
+				} else {
+        			chrome.browserAction.setBadgeBackgroundColor({color: '#E2292E'});
+				}
+			},
+			error: function(error) {
+				stashObj.buildStatus = error;
+				chrome.browserAction.setBadgeBackgroundColor({color: '#369ED3'});
+			}
+		});
+	},
 	init: function() {
 		if (stashObj.repeat){
             clearTimeout(stashObj.repeat);
         }
 
+        stashObj.getBuildStatus();
         stashObj.getReviewRequest();
         stashObj.getAuthorRequest();
         stashObj.getAllPullRequest();
@@ -62,11 +86,23 @@ var stashObj = {
 		var url = item.links.self[0].href,
 			notificationOptions = {
 				title: item.author.user.displayName,
-                iconUrl: 'images/icon-128.png',
+                iconUrl: 'https://stash.lbi.co.uk/users/' + item.author.user.slug + '/avatar.png?s=128', // 'images/icon-128.png'
               	type: 'basic',
               	message: item.title
 			},
 			comments = item.attributes.commentCount ? item.attributes.commentCount : ["0"];
+
+		if (stashObj.buildStatus.hasOwnProperty('result')) {
+			if (stashObj.buildStatus.result[0].buildState === 'Failed') {
+				if (stashObj.redBuild === false) {
+					notificationOptions.title = 'RED BUILD';
+					notificationOptions.iconUrl = 'images/icon-128.png';
+					notificationOptions.message = 'Last build is failed! Be carefull to merge PRs'
+					chrome.notifications.create(url, notificationOptions);
+					stashObj.redBuild = true;
+				}
+			}
+		}
 
 		if (!stashObj.reviewItems[index].attributes.commentCount) {
 			stashObj.reviewItems[index].attributes.commentCount = ["0"];
