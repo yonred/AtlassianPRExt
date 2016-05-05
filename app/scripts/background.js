@@ -78,6 +78,7 @@ var stashObj = {
         stashObj.getAuthorRequest();
         stashObj.getAllPullRequest();
         stashObj.repeat = setTimeout(stashObj.init, 30000);
+        chrome.notifications.onClicked.addListener(stashObj.clickNotification);
 	},
 	updateNotifications: function() {
 		stashObj.reviewItems.forEach(stashObj.sendNotification);
@@ -98,7 +99,7 @@ var stashObj = {
 					notificationOptions.title = 'RED BUILD';
 					notificationOptions.iconUrl = 'images/icon-128.png';
 					notificationOptions.message = 'Last build is failed! Be carefull to merge PRs'
-					chrome.notifications.create(url, notificationOptions);
+					chrome.notifications.create('http://bamboo.lbi.co.uk/browse/HELIOS-AEMDEV', notificationOptions);
 					stashObj.redBuild = true;
 				}
 			}
@@ -121,6 +122,10 @@ var stashObj = {
 				}
 			});
 		}
+	},
+	clickNotification: function(id) {
+        stashObj.seenNotifications.push(id);
+        chrome.tabs.create({ url: id });
 	}
 };
 stashObj.init();
