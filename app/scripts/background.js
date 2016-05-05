@@ -11,6 +11,7 @@ var stashObj = {
 	seenNotifications: [],
 	reviewComments: [],
 	buildStatus: {},
+	clickedNotifications: [],
 	redBuild: false,
 	getReviewRequest: function() {
 		$.ajax({
@@ -77,8 +78,8 @@ var stashObj = {
         stashObj.getReviewRequest();
         stashObj.getAuthorRequest();
         stashObj.getAllPullRequest();
-        stashObj.repeat = setTimeout(stashObj.init, 30000);
         chrome.notifications.onClicked.addListener(stashObj.clickNotification);
+        stashObj.repeat = setTimeout(stashObj.init, 30000);
 	},
 	updateNotifications: function() {
 		stashObj.reviewItems.forEach(stashObj.sendNotification);
@@ -89,7 +90,8 @@ var stashObj = {
 				title: item.author.user.displayName,
                 iconUrl: 'https://stash.lbi.co.uk/users/' + item.author.user.slug + '/avatar.png?s=128', // 'images/icon-128.png'
               	type: 'basic',
-              	message: item.title
+              	message: item.title,
+              	isClickable: true
 			},
 			comments = item.attributes.commentCount ? item.attributes.commentCount : ["0"];
 
@@ -99,8 +101,10 @@ var stashObj = {
 					notificationOptions.title = 'RED BUILD';
 					notificationOptions.iconUrl = 'images/icon-128.png';
 					notificationOptions.message = 'Last build is failed! Be carefull to merge PRs'
-					chrome.notifications.create('http://bamboo.lbi.co.uk/browse/HELIOS-AEMDEV', notificationOptions);
-					stashObj.redBuild = true;
+					chrome.notifications.create('http://bamboo.lbi.co.uk/browse/HELIOS-AEMDEV', notificationOptions, function() {
+						stashObj.clickedNotifications = [];
+						stashObj.redBuild = true;
+					});
 				}
 			}
 		}
@@ -118,14 +122,19 @@ var stashObj = {
 				if (itemObj.url === url && itemObj.comments[0] !== comments[0]) {
 					itemObj.comments[0] = comments[0];
 					notificationOptions.title = 'NEW COMMENT FOR';
-					chrome.notifications.create(url, notificationOptions);
+					chrome.notifications.create(url, notificationOptions, function() {
+						stashObj.clickedNotifications = [];
+					});
 				}
 			});
 		}
 	},
 	clickNotification: function(id) {
-        stashObj.seenNotifications.push(id);
-        chrome.tabs.create({ url: id });
+		if (id && stashObj.clickedNotifications.indexOf(id) === -1) {
+    		chrome.tabs.create({ url: id });
+    		stashObj.clickedNotifications.push(id);
+    		chrome.notifications.clear(id);
+    	}
 	}
 };
 stashObj.init();
