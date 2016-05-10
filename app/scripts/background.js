@@ -22,6 +22,9 @@ var stashObj = {
 				stashObj.reviewItems = data.values;
         		stashObj.updateNotifications();
         		chrome.browserAction.setBadgeText({text: stashObj.reviewItems.length + ' PR'});
+			},
+			error: function(error) {
+				stashObj.reviewItems = error;
 			}
 		});
 	},

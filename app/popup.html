@@ -13,7 +13,7 @@
   </head>
   <body ng-app="stashApp">
     <div class="stash-app-container" ng-controller="reviewListCtrl">
-        <div class="container">
+        <div ng-hide="listReviews.statusText == 'error'" class="container">
             <div ng-show="objBamboo.result[0].buildState == 'Failed'" class="alert alert-danger" role="alert">
                 <strong>BUILD #{{objBamboo.result[0].buildNumber}} FAILED!</strong> Check build status, before merge any ticket in this <a href="http://bamboo.lbi.co.uk/browse/HELIOS-AEMDEV" target="_blank" class="alert-link">Link</a>
             </div>
@@ -144,6 +144,9 @@
                     <h4 class="text-center" ng-if="listDevelopers.devIS.length == 0">Add name and email of your IS group</h4>
                 </div>
             </div>
+        </div>
+        <div ng-show="listReviews.statusText == 'error'" class="container">
+            <h3 class="text-center">You're not logged yet <br/> <a href="https://stash.lbi.co.uk/login" target="_blank">Log In</a><h3/>
         </div>
     </div>
 
