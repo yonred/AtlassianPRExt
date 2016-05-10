@@ -1,0 +1,21 @@
+.stash-app-container {
+	padding-top: 10px;
+	width: 600px;
+}
+
+.tab-content.extension {
+	padding-top: 10px;
+}
+
+.reviewers-list .badge {
+	background-color: #5cb85c;
+}
+
+.reviewers-list .list-group-item.active {
+	background-color: #d9534f;
+	border-color: #d43f3a;
+}
+
+.reviewers-list .list-group-item.active > .badge {
+	color: #d9534f;
+}

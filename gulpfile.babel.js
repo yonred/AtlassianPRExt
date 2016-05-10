@@ -1,3 +1,4 @@
+'use strict';
 // generated on 2016-04-11 using generator-chrome-extension 0.5.4
 import gulp from 'gulp';
 import gulpLoadPlugins from 'gulp-load-plugins';
@@ -27,7 +28,7 @@ function lint(files, options) {
   };
 }
 
-gulp.task('lint', lint('app/scripts/**/*.js', {
+gulp.task('lint', lint(['app/scripts/**/*.js', '!app/scripts/**/*.min.js'], {
   env: {
     es6: false
   }

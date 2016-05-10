@@ -24,7 +24,7 @@ app/bower_components
 
 
 ### Linux ###
-.*
+.DS_Store
 !.gitignore
 !.git*
 !.editorconfig
@@ -40,7 +40,6 @@ app/bower_components
 
 
 ### Yeoman ###
-dist
 test/bower_components
 
 

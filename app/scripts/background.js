@@ -11,12 +11,13 @@ var stashObj = {
 	seenNotifications: [],
 	reviewComments: [],
 	buildStatus: {},
+	clickedNotifications: [],
 	redBuild: false,
 	getReviewRequest: function() {
 		$.ajax({
-			method: "GET",
-			url: "https://stash.lbi.co.uk/rest/inbox/latest/pull-requests?role=reviewer&limit=20",
-			dataType:"json",
+			method: 'GET',
+			url: 'https://stash.lbi.co.uk/rest/inbox/latest/pull-requests?role=reviewer&limit=20',
+			dataType:'json',
 			success: function(data) {
 				stashObj.reviewItems = data.values;
         		stashObj.updateNotifications();
@@ -26,9 +27,9 @@ var stashObj = {
 	},
 	getAuthorRequest: function() {
 		$.ajax({
-			method: "GET",
-			url: "https://stash.lbi.co.uk/rest/inbox/latest/pull-requests?role=author&limit=20",
-			dataType:"json",
+			method: 'GET',
+			url: 'https://stash.lbi.co.uk/rest/inbox/latest/pull-requests?role=author&limit=20',
+			dataType:'json',
 			success: function(data) {
 				stashObj.authorItems = data.values;
 			}
@@ -36,9 +37,9 @@ var stashObj = {
 	},
 	getAllPullRequest: function() {
 		$.ajax({
-			method: "GET",
-			url: "https://stash.lbi.co.uk/rest/api/1.0/projects/HEL/repos/application/pull-requests?state=OPEN&limit=100",
-			dataType:"json",
+			method: 'GET',
+			url: 'https://stash.lbi.co.uk/rest/api/1.0/projects/HEL/repos/application/pull-requests?state=OPEN&limit=100',
+			dataType:'json',
 			success: function(data) {
 				stashObj.pullRequestItems = [];
 				data.values.forEach(function(item) {
@@ -49,9 +50,9 @@ var stashObj = {
 	},
 	getBuildStatus: function() {
 		$.ajax({
-			method: "GET",
-			url: "http://bamboo.lbi.co.uk/rest/api/latest/result/HELIOS-AEMDEV",
-			dataType:"json",
+			method: 'GET',
+			url: 'http://bamboo.lbi.co.uk/rest/api/latest/result/HELIOS-AEMDEV',
+			dataType:'json',
 			success: function(data) {
 				stashObj.buildStatus = data.results;
 
@@ -77,6 +78,7 @@ var stashObj = {
         stashObj.getReviewRequest();
         stashObj.getAuthorRequest();
         stashObj.getAllPullRequest();
+        chrome.notifications.onClicked.addListener(stashObj.clickNotification);
         stashObj.repeat = setTimeout(stashObj.init, 30000);
 	},
 	updateNotifications: function() {
@@ -88,9 +90,10 @@ var stashObj = {
 				title: item.author.user.displayName,
                 iconUrl: 'https://stash.lbi.co.uk/users/' + item.author.user.slug + '/avatar.png?s=128', // 'images/icon-128.png'
               	type: 'basic',
-              	message: item.title
+              	message: item.title,
+              	isClickable: true
 			},
-			comments = item.attributes.commentCount ? item.attributes.commentCount : ["0"];
+			comments = item.attributes.commentCount ? item.attributes.commentCount : ['0'];
 
 		if (stashObj.buildStatus.hasOwnProperty('result')) {
 			if (stashObj.buildStatus.result[0].buildState === 'Failed') {
@@ -98,29 +101,40 @@ var stashObj = {
 					notificationOptions.title = 'RED BUILD';
 					notificationOptions.iconUrl = 'images/icon-128.png';
 					notificationOptions.message = 'Last build is failed! Be carefull to merge PRs'
-					chrome.notifications.create(url, notificationOptions);
-					stashObj.redBuild = true;
+					chrome.notifications.create('http://bamboo.lbi.co.uk/browse/HELIOS-AEMDEV', notificationOptions, function() {
+						stashObj.clickedNotifications = [];
+						stashObj.redBuild = true;
+					});
 				}
 			}
 		}
 
 		if (!stashObj.reviewItems[index].attributes.commentCount) {
-			stashObj.reviewItems[index].attributes.commentCount = ["0"];
+			stashObj.reviewItems[index].attributes.commentCount = ['0'];
 		}
 
 		if (stashObj.seenNotifications.indexOf(url) === -1) {
             stashObj.seenNotifications.push(url);
-            stashObj.reviewComments.push({"url": url, "comments": comments});
+            stashObj.reviewComments.push({'url': url, 'comments': comments});
 			chrome.notifications.create(url, notificationOptions);
 		} else {
 			stashObj.reviewComments.forEach(function(itemObj) {
 				if (itemObj.url === url && itemObj.comments[0] !== comments[0]) {
 					itemObj.comments[0] = comments[0];
 					notificationOptions.title = 'NEW COMMENT FOR';
-					chrome.notifications.create(url, notificationOptions);
+					chrome.notifications.create(url, notificationOptions, function() {
+						stashObj.clickedNotifications = [];
+					});
 				}
 			});
 		}
+	},
+	clickNotification: function(id) {
+		if (id && stashObj.clickedNotifications.indexOf(id) === -1) {
+    		chrome.tabs.create({ url: id });
+    		stashObj.clickedNotifications.push(id);
+    		chrome.notifications.clear(id);
+    	}
 	}
 };
 stashObj.init();
