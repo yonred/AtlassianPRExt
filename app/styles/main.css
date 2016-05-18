@@ -19,3 +19,14 @@
 .reviewers-list .list-group-item.active > .badge {
 	color: #d9534f;
 }
+
+.stash-app-container .panel-title {
+	position: relative;
+	padding-right: 35px;
+}
+
+.stash-app-container .number-approval {
+	position: absolute;
+	right: 0;
+	top: calc(50% - 8px);
+}
