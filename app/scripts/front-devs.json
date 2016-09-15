@@ -1,10 +1,6 @@
 {
 	"frontEnd": [
 		{
-			"name": "Ivan Siachoque",
-			"email": "ivan.siachoque@prodigious.com"
-		},
-		{
 			"name": "Sergio Ramirez Gonzales",
 			"email": "sergio.ramirez.gonzalez@digitaslbi.com"
 		},
@@ -19,10 +15,6 @@
 		{
 			"name": "Daniela Salazar",
 			"email": "daniela.salazar@prodigious.com"
-		},
-		{
-			"name": "Gabriel Garnica",
-			"email": "brian.garnica@prodigious.com"
 		},
 		{
 			"name": "Edwin Torres",
@@ -65,14 +57,6 @@
 			"email": "sebastian.duarte@prodigious.com"
 		},
 		{
-			"name": "German Molina",
-			"email": "german.molina@prodigious.com"
-		},
-		{
-			"name": "Luis Villalba",
-			"email": "luis.villalba@prodigious.com"
-		},
-		{
 			"name": "Samanta Martinez",
 			"email": "samanta.martinez@prodigious.com"
 		},
@@ -87,6 +71,38 @@
 		{
 			"name": "Jenny Manrique",
 			"email": "jenny.manrique@prodigious.com"
+		},
+    {
+			"name": "Carlos Castillo",
+			"email": "carlos.castillo@prodigious.com"
+		},
+    {
+			"name": "Esteban Mutis",
+			"email": "esteban.mutis@prodigious.com"
+		},
+    {
+			"name": "Sergio Benítez",
+			"email": "sergio.benitez@prodigious.com"
+		},
+    {
+			"name": "Samuel Rivera",
+			"email": "samuel.rivera@prodigious.com"
+		},
+    {
+			"name": "Jorge Ardila",
+			"email": "jorge.ardila@prodigious.com"
+		},
+    {
+			"name": "Andrés Montaña",
+			"email": "andres.montana@prodigious.com"
+		},
+    {
+			"name": "Andrés Narvaez",
+			"email": "andres.narvaez@prodigious.com"
+		},
+    {
+			"name": "Hector Prieto",
+			"email": "hector.prieto@prodigious.com"
 		}
 	],
 	"backEnd": [
